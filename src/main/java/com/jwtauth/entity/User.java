@@ -1,6 +1,7 @@
 package com.jwtauth.entity;
 
 import jakarta.persistence.*;
+import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.security.core.GrantedAuthority;
@@ -11,6 +12,7 @@ import java.util.Date;
 import java.util.List;
 
 @Table(name = "users")
+@Data
 @Entity
 public class User implements UserDetails {
     @Id
@@ -40,10 +42,6 @@ public class User implements UserDetails {
         return List.of();
     }
 
-    public String getPassword() {
-        return password;
-    }
-
     @Override
     public String getUsername() {
         return email;
@@ -69,26 +67,9 @@ public class User implements UserDetails {
         return true;
     }
 
-    public Integer getId() {
-        return id;
-    }
-
-    public User setId(Integer id) {
-        this.id = id;
-        return this;
-    }
-
-    public String getFullName() {
-        return fullName;
-    }
-
     public User setFullName(String fullName) {
         this.fullName = fullName;
         return this;
-    }
-
-    public String getEmail() {
-        return email;
     }
 
     public User setEmail(String email) {
@@ -101,33 +82,4 @@ public class User implements UserDetails {
         return this;
     }
 
-    public Date getCreatedAt() {
-        return createdAt;
-    }
-
-    public User setCreatedAt(Date createdAt) {
-        this.createdAt = createdAt;
-        return this;
-    }
-
-    public Date getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public User setUpdatedAt(Date updatedAt) {
-        this.updatedAt = updatedAt;
-        return this;
-    }
-
-    @Override
-    public String toString() {
-        return "User{" +
-                "id=" + id +
-                ", fullName='" + fullName + '\'' +
-                ", email='" + email + '\'' +
-                ", password='" + password + '\'' +
-                ", createdAt=" + createdAt +
-                ", updatedAt=" + updatedAt +
-                '}';
-    }
 }

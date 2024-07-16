@@ -6,6 +6,7 @@ import com.jwtauth.entity.User;
 import com.jwtauth.response.LoginResponse;
 import com.jwtauth.service.AuthenticationService;
 import com.jwtauth.service.JwtService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -14,14 +15,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RequestMapping("/auth")
 @RestController
+@RequiredArgsConstructor
 public class AuthenticationController {
     private final JwtService jwtService;
     private final AuthenticationService authenticationService;
-
-    public AuthenticationController(JwtService jwtService, AuthenticationService authenticationService) {
-        this.jwtService = jwtService;
-        this.authenticationService = authenticationService;
-    }
 
     @PostMapping("/signup")
     public ResponseEntity<User> register(@RequestBody RegisterUserDto registerUserDto) {

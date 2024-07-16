@@ -2,6 +2,7 @@ package com.jwtauth.controller;
 
 import com.jwtauth.entity.User;
 import com.jwtauth.service.UserService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -13,12 +14,9 @@ import java.util.List;
 
 @RequestMapping("/users")
 @RestController
+@RequiredArgsConstructor
 public class UserController {
     private final UserService userService;
-
-    public UserController(UserService userService) {
-        this.userService = userService;
-    }
 
     @GetMapping("/me")
     public ResponseEntity<User> authenticatedUser() {
