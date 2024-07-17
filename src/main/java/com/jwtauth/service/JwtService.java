@@ -37,6 +37,7 @@ public class JwtService {
     }
 
     public String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
+        // TODO: Revoke active access token
         return buildToken(extraClaims, userDetails, jwtExpiration);
     }
 
