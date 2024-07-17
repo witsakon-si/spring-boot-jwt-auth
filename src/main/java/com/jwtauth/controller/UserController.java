@@ -2,6 +2,7 @@ package com.jwtauth.controller;
 
 import com.jwtauth.entity.User;
 import com.jwtauth.service.UserService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -15,6 +16,7 @@ import java.util.List;
 @RequestMapping("/users")
 @RestController
 @RequiredArgsConstructor
+@SecurityRequirement(name = "Bearer Authentication")
 public class UserController {
     private final UserService userService;
 
