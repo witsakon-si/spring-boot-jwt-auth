@@ -21,6 +21,7 @@ import java.util.UUID;
 public class RefreshTokenService {
     private final RefreshTokenRepository refreshTokenRepository;
     private final UserRepository userRepository;
+    private final JwtService jwtService;
 
     @Value("${security.jwt.refresh-token.expiration-time}")
     private Long refreshTokenExp;
@@ -60,7 +61,9 @@ public class RefreshTokenService {
     }
 
     @Transactional
-    public int deleteByUserId(Long userId) {
-        return refreshTokenRepository.deleteByUser(userRepository.findById(userId).get());
+    public int deleteByUserId(User user) {
+        int status = refreshTokenRepository.deleteByUser(user);
+        jwtService.revokeAccessToken(user.getUsername());
+        return status;
     }
 }

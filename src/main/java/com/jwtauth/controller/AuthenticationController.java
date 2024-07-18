@@ -59,9 +59,8 @@ public class AuthenticationController {
     @PostMapping("/logout")
     public ResponseEntity<String> logout(@RequestBody RefreshTokenDto refreshTokenDto) {
         String refreshToken = refreshTokenDto.getRefreshToken();
-        // TODO: Revoke active access token
         refreshTokenService.findByToken(refreshToken)
-                .map(token -> refreshTokenService.deleteByUserId(token.getUser().getId()))
+                .map(token -> refreshTokenService.deleteByUserId(token.getUser()))
                 .orElseThrow(() -> new RefreshTokenNotFoundException(refreshToken));
         return ResponseEntity.ok("Logout successful!");
     }

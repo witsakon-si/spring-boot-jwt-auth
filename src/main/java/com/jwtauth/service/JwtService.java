@@ -1,27 +1,36 @@
 package com.jwtauth.service;
 
+import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.map.IMap;
+import com.jwtauth.utils.ApplicationConstant;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
-import java.security.Key;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.function.Function;
-
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
+import java.security.Key;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
+
 @Service
+@RequiredArgsConstructor
 public class JwtService {
     @Value("${security.jwt.secret-key}")
     private String secretKey;
 
     @Value("${security.jwt.expiration-time}")
     private long jwtExpiration;
+
+    private final HazelcastInstance hz;
+    private final ApplicationConstant appConstant;
 
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
@@ -37,12 +46,23 @@ public class JwtService {
     }
 
     public String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
-        // TODO: Revoke active access token
-        return buildToken(extraClaims, userDetails, jwtExpiration);
+        String token = buildToken(extraClaims, userDetails, jwtExpiration);
+        cacheAccessToken(userDetails.getUsername(), token); // replace existing when token in cache
+        return token;
     }
 
-    public long getExpirationTime() {
-        return jwtExpiration;
+    public void cacheAccessToken(String username, String accessToken) {
+        hz.getMap(appConstant.TOKEN_CACHE).put(username, accessToken, jwtExpiration, TimeUnit.MILLISECONDS);
+    }
+
+    public void revokeAccessToken(String username) {
+        hz.getMap(appConstant.TOKEN_CACHE).remove(username);
+    }
+
+    private boolean isExistInCache(String username, String accessToken) {
+        IMap<String, String> accessTokenCache = hz.getMap(appConstant.TOKEN_CACHE);
+        String cacheToken = accessTokenCache.get(username);
+        return cacheToken != null && cacheToken.equals(accessToken);
     }
 
     private String buildToken(
@@ -62,7 +82,7 @@ public class JwtService {
 
     public boolean isTokenValid(String token, UserDetails userDetails) {
         final String username = extractUsername(token);
-        return (username.equals(userDetails.getUsername())) && !isTokenExpired(token);
+        return (username.equals(userDetails.getUsername())) && !isTokenExpired(token) && isExistInCache(username, token);
     }
 
     private boolean isTokenExpired(String token) {

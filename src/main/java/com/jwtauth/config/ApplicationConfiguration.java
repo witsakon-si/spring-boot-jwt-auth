@@ -1,6 +1,8 @@
 package com.jwtauth.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jwtauth.repository.UserRepository;
+import com.jwtauth.utils.ApplicationConstant;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -41,5 +43,15 @@ public class ApplicationConfiguration {
         authProvider.setPasswordEncoder(passwordEncoder());
 
         return authProvider;
+    }
+
+    @Bean
+    public ApplicationConstant applicationConstant() {
+        return new ApplicationConstant();
+    }
+
+    @Bean
+    public ObjectMapper objectMapper() {
+        return new ObjectMapper();
     }
 }
