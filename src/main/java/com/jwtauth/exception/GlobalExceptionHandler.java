@@ -42,17 +42,17 @@ public class GlobalExceptionHandler {
         }
 
         if (exception instanceof ExpiredJwtException) {
-            errorDetail = ProblemDetail.forStatusAndDetail(HttpStatusCode.valueOf(403), exception.getMessage());
+            errorDetail = ProblemDetail.forStatusAndDetail(HttpStatusCode.valueOf(419), exception.getMessage());
             errorDetail.setProperty("description", "The JWT token has expired");
         }
 
         if (exception instanceof RefreshTokenExpireException) {
-            errorDetail = ProblemDetail.forStatusAndDetail(HttpStatusCode.valueOf(403), exception.getMessage());
+            errorDetail = ProblemDetail.forStatusAndDetail(HttpStatusCode.valueOf(401), exception.getMessage());
             errorDetail.setProperty("description", "The Refresh token has expired");
         }
 
         if (exception instanceof RefreshTokenNotFoundException) {
-            errorDetail = ProblemDetail.forStatusAndDetail(HttpStatusCode.valueOf(403), exception.getMessage());
+            errorDetail = ProblemDetail.forStatusAndDetail(HttpStatusCode.valueOf(401), exception.getMessage());
             errorDetail.setProperty("description", "The Refresh token not found!");
         }
 

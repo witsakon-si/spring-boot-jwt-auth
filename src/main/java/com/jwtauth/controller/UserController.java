@@ -1,5 +1,6 @@
 package com.jwtauth.controller;
 
+import com.jwtauth.dto.UserDto;
 import com.jwtauth.entity.User;
 import com.jwtauth.service.UserService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -30,8 +31,8 @@ public class UserController {
     }
 
     @GetMapping
-    public ResponseEntity<List<User>> allUsers() {
-        List <User> users = userService.allUsers();
+    public ResponseEntity<List<UserDto>> allUsers() {
+        List <UserDto> users = userService.allUsers();
 
         return ResponseEntity.ok(users);
     }

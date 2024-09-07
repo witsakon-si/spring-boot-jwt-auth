@@ -1,6 +1,7 @@
 package com.jwtauth.controller;
 
 import com.jwtauth.dto.LoginUserDto;
+import com.jwtauth.dto.ResponseDto;
 import com.jwtauth.dto.RefreshTokenDto;
 import com.jwtauth.dto.RegisterUserDto;
 import com.jwtauth.entity.RefreshToken;
@@ -26,10 +27,21 @@ public class AuthenticationController {
     private final RefreshTokenService refreshTokenService;
 
     @PostMapping("/signup")
-    public ResponseEntity<String> register(@RequestBody RegisterUserDto registerUserDto) {
-        authenticationService.signup(registerUserDto);
+    public ResponseEntity<ResponseDto> register(@RequestBody RegisterUserDto registerUserDto) {
+        ResponseDto response = new ResponseDto();
+        try {
+            authenticationService.signup(registerUserDto);
+            response.setMessage("Registration successful");
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            if (e.getMessage().contains("Unique index")) {
+                response.setMessage("Email was registered");
+            } else {
+                response.setMessage(e.getMessage());
+            }
+            return ResponseEntity.internalServerError().body(response);
 
-        return ResponseEntity.ok("Sign Up successful!");
+        }
     }
 
     @PostMapping("/login")
@@ -39,8 +51,14 @@ public class AuthenticationController {
         String jwtToken = jwtService.generateToken(authenticatedUser);
         String refreshToken = refreshTokenService.createRefreshToken(authenticatedUser.getId());
 
-        LoginResponse loginResponse = new LoginResponse(jwtToken, refreshToken);
+        LoginResponse loginResponse = new LoginResponse(jwtToken, refreshToken, authenticatedUser.getFullName());
         return ResponseEntity.ok(loginResponse);
+    }
+
+    @PostMapping("/resetPassword")
+    public ResponseEntity<ResponseDto> resetPassword(@RequestBody LoginUserDto loginUserDto) {
+        ResponseDto response = new ResponseDto();
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/refreshToken")
@@ -52,7 +70,7 @@ public class AuthenticationController {
                 .map(RefreshToken::getUser)
                 .map(user -> {
                     String accessToken = jwtService.generateToken(user);
-                    return ResponseEntity.ok(new LoginResponse(accessToken, refreshToken));
+                    return ResponseEntity.ok(new LoginResponse(accessToken, refreshToken, user.getFullName()));
                 }).orElseThrow(() -> new RefreshTokenNotFoundException(refreshToken));
     }
 

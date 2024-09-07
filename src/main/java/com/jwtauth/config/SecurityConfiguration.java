@@ -32,15 +32,14 @@ public class SecurityConfiguration {
         http.formLogin(AbstractHttpConfigurer::disable);
         http.httpBasic(AbstractHttpConfigurer::disable);
         http.authorizeHttpRequests(auth -> auth
-                        .requestMatchers(
-                                "/auth/**",
-                                "/admin/**",
-                                "/swagger-ui/**",
-                                "/v2/api-docs",
-                                "/v2/api-docs/**",
-                                "/favicon.ico",
-                                "/h2-console/**"
-                        ).permitAll()
+                .requestMatchers("/api/auth/**").permitAll()
+                .requestMatchers("/swagger-ui/**").permitAll()
+                .requestMatchers("/v2/api-docs").permitAll()
+                .requestMatchers("/v2/api-docs/**").permitAll()
+                .requestMatchers( "/favicon.ico").permitAll()
+                .requestMatchers( "/h2-console/**").permitAll()
+                .anyRequest()
+                .authenticated()
         );
         http.exceptionHandling(ex -> {
             ex.authenticationEntryPoint((request, response, authException) -> response.sendError(401, "Unauthorized"));
@@ -53,7 +52,7 @@ public class SecurityConfiguration {
 
         return http.build();
     }
-
+/*
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
@@ -68,4 +67,5 @@ public class SecurityConfiguration {
 
         return source;
     }
+*/
 }
