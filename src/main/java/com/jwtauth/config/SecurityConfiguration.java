@@ -4,8 +4,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -24,27 +26,27 @@ public class SecurityConfiguration {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http.csrf()
-                .disable()
-                .authorizeHttpRequests()
-                .requestMatchers(
-                        "/auth/**",
-                        "/admin/**",
-                        "/swagger-ui/**",
-                        "/v2/api-docs",
-                        "/v2/api-docs/**",
-                        "/favicon.ico",
-                        "/h2-console/**"
-                )
-                .permitAll()
-                .anyRequest()
-                .authenticated()
-                .and()
-                .sessionManagement()
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                .and()
-                .authenticationProvider(authenticationProvider)
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+        http.csrf(AbstractHttpConfigurer::disable);
+        http.cors(Customizer.withDefaults());
+        http.sessionManagement(sessionManagement -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+        http.formLogin(AbstractHttpConfigurer::disable);
+        http.httpBasic(AbstractHttpConfigurer::disable);
+        http.authorizeHttpRequests(auth -> auth
+                        .requestMatchers(
+                                "/auth/**",
+                                "/admin/**",
+                                "/swagger-ui/**",
+                                "/v2/api-docs",
+                                "/v2/api-docs/**",
+                                "/favicon.ico",
+                                "/h2-console/**"
+                        ).permitAll()
+        );
+        http.exceptionHandling(ex -> {
+            ex.authenticationEntryPoint((request, response, authException) -> response.sendError(401, "Unauthorized"));
+            ex.accessDeniedHandler((request, response, authException) -> response.sendError(403, "Forbidden"));
+        });
+        http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         // disables the X-Frame-Options header to allow the H2 console to be displayed in an iframe
         http.headers().frameOptions().disable();
